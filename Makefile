@@ -38,9 +38,15 @@ OUTPUT := $(OUTPUT_DIR)/viamrtsp-$(GOOS)-$(GOARCH)
 build-linux:
 	go build -v -o ./bin/viamrtsp-$(GOOS)-$(GOARCH) cmd/module/cmd.go
 
+edit-android:
+	# temporary command to get an android-compatible rdk branch
+	go mod edit -replace=go.viam.com/rdk=github.com/abe-winter/rdk@droid-apk
+	go mod tidy
+
 # Build go binary for android
 .PHONY: build-android
 build-android:
+	# if this fails with Camera interfaces, run `make edit-android` first
 	GOOS=android GOARCH=arm64 CGO_ENABLED=$(CGO_ENABLED) \
 		CGO_CFLAGS="$(CGO_CFLAGS)" \
 		CGO_LDFLAGS="$(CGO_LDFLAGS)" \
