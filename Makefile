@@ -8,7 +8,7 @@ UNAME=$(shell uname)
 ifeq ($(UNAME),Linux)
 	NDK_ROOT ?= $(HOME)/Android/Sdk/ndk/26.1.10909125
 	HOST_OS ?= linux
-	CC_ARCH ?= x86_64
+	CC_ARCH ?= aarch64
 else
 	NDK_ROOT ?= $(HOME)/Library/Android/sdk/ndk/26.1.10909125
 	HOST_OS ?= darwin
