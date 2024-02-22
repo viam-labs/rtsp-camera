@@ -40,6 +40,7 @@ build-linux:
 
 edit-android:
 	# temporary command to get an android-compatible rdk branch
+	# todo: dedup with rdk-droid command
 	go mod edit -replace=go.viam.com/rdk=github.com/abe-winter/rdk@droid-apk
 	go mod tidy
 
@@ -67,10 +68,15 @@ push-appimg:
 linux-dep:
 	sudo apt install libswscale-dev libavcodec-dev
 
+FFmpeg:
+	# clone ffmpeg in the spot we need
+	# todo: maybe make this a submodule
+	git clone https://github.com/FFmpeg/FFmpeg -b n6.1.1 --depth 1
+
 # Build FFmpeg for Android
 # Requires Android NDK to be installed
 .PHONY: ffmpeg-android
-ffmpeg-android:
+ffmpeg-android: FFmpeg
 	cd FFmpeg && \
 	./configure \
 		--prefix=$(HOME)/viamrtsp/ffmpeg-android \
