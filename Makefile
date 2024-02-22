@@ -73,7 +73,7 @@ push-appimg:
 
 # Install dependencies
 linux-dep:
-	sudo apt install libswscale-dev libavcodec-dev
+	sudo apt-get install -qy libswscale-dev libavcodec-dev
 
 FFmpeg:
 	# clone ffmpeg in the spot we need
