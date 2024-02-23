@@ -9,5 +9,5 @@
       "model": "viam-labs:viamrtsp:rtsp-h264"
     }
   ],
-  "entrypoint": "bin/viamrtsp"
+  "entrypoint": "run.sh"
 }
