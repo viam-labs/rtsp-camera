@@ -60,7 +60,7 @@ build-android:
 
 module.tar.gz: $(OUTPUT) run.sh
 	# todo: dedup with 'make module' command
-	tar cf $@ $< -C $(FFMPEG_PREFIX) lib
+	tar czf $@ $^ -C $(FFMPEG_PREFIX) lib
 
 # Create linux AppImage bundle
 .PHONY: package
