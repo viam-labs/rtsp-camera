@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 if [ $(command -v getprop) ]; then
 	echo detected android host, reading libraries from $$PWD/lib
