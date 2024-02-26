@@ -59,7 +59,7 @@ push-appimg:
 
 # Install dependencies
 linux-dep:
-	sudo apt install libswscale-dev libavcodec-dev
+	sudo apt install libswscale-dev libavcodec-dev libavformat-dev
 
 # Build FFmpeg for Android
 # Requires Android NDK to be installed

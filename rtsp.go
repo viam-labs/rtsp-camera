@@ -13,7 +13,9 @@ import (
 	"github.com/bluenviron/gortsplib/v3/pkg/base"
 	"github.com/bluenviron/gortsplib/v3/pkg/formats"
 	"github.com/bluenviron/gortsplib/v3/pkg/formats/rtph264"
+	"github.com/bluenviron/gortsplib/v3/pkg/formats/rtph265"
 	"github.com/bluenviron/gortsplib/v3/pkg/liberrors"
+	"github.com/bluenviron/gortsplib/v3/pkg/media"
 	"github.com/bluenviron/gortsplib/v3/pkg/url"
 
 	"github.com/pion/rtp"
@@ -26,6 +28,11 @@ import (
 	"go.viam.com/rdk/logging"
 	"go.viam.com/rdk/resource"
 )
+
+/*
+#include <libavcodec/avcodec.h>
+*/
+import "C"
 
 var family = resource.ModelNamespace("erh").WithFamily("viamrtsp")
 var ModelH264 = family.WithModel("rtsp-h264")
@@ -48,7 +55,7 @@ type rtspCamera struct {
 	u *url.URL
 
 	client     *gortsplib.Client
-	rawDecoder *h264Decoder
+	rawDecoder *decoder
 
 	cancelCtx  context.Context
 	cancelFunc context.CancelFunc
@@ -148,8 +155,38 @@ func (rc *rtspCamera) reconnectClient() (err error) {
 		return err
 	}
 
-	// find the H264 media and format
+	// find codec info from GetStreamInfo
+	codecInfo := GetStreamInfo(rc.u.String())
+	rc.logger.Infof("codec info: %v", codecInfo)
+
+	switch codecInfo {
+	case "h264":
+		rc.logger.Infof("setting up H264")
+		err = rc.InitH264(tracks, baseURL)
+	case "h265":
+		rc.logger.Infof("setting up H265")
+		err = rc.InitH265(tracks, baseURL)
+	default:
+		return errors.New("codec not supported")
+	}
+	if err != nil {
+		return err
+	}
+
+	_, err = rc.client.Play(nil)
+	if err != nil {
+		return err
+	}
+	clientSuccessful = true
+
+	return nil
+}
+
+// InitH264
+func (rc *rtspCamera) InitH264(tracks media.Medias, baseURL *url.URL) (err error) {
+	// setup RTP/H264 -> H264 decoder
 	var format *formats.H264
+
 	track := tracks.FindFormat(&format)
 	if track == nil {
 		rc.logger.Warnf("tracks available")
@@ -164,19 +201,17 @@ func (rc *rtspCamera) reconnectClient() (err error) {
 		return err
 	}
 
-	// setup RTP/H264 -> H264 decoder
 	rtpDec, err := format.CreateDecoder2()
 	if err != nil {
-		return err
+		rc.logger.Errorf("error creating H264 decoder %v", err)
 	}
 
-	// setup H264 -> raw frames decoder
-	rc.rawDecoder, err = newH264Decoder()
+	rc.rawDecoder, err = newDecoder(C.AV_CODEC_ID_H264)
 	if err != nil {
 		return err
 	}
 
-	// if SPS and PPS are present into the SDP, send them to the decoder
+	// For H.264, handle SPS and PPS (assuming your H264 format has these fields)
 	if format.SPS != nil {
 		rc.rawDecoder.decode(format.SPS)
 	}
@@ -194,17 +229,12 @@ func (rc *rtspCamera) reconnectClient() (err error) {
 			}
 			return
 		}
-
 		for _, nalu := range au {
-
 			if len(nalu) < 20 {
-				// TODO(ERH): this is probably wrong, but fixes a spam issue with "no frame!"
+				rc.logger.Warnf("nalu too short")
 				continue
 			}
-
-			// convert NALUs into RGBA frames
 			lastImage, err := rc.rawDecoder.decode(nalu)
-
 			if err != nil {
 				rc.logger.Error("error decoding(2) h264 rtsp stream  %v", err)
 				return
@@ -215,11 +245,77 @@ func (rc *rtspCamera) reconnectClient() (err error) {
 			}
 		}
 	})
-	_, err = rc.client.Play(nil)
+
+	return nil
+}
+
+// InitH265
+func (rc *rtspCamera) InitH265(tracks media.Medias, baseURL *url.URL) (err error) {
+	var format *formats.H265
+
+	track := tracks.FindFormat(&format)
+	if track == nil {
+		rc.logger.Warnf("tracks available")
+		for _, x := range tracks {
+			rc.logger.Warnf("\t %v", x)
+		}
+		return errors.New("h264 track not found")
+	}
+
+	_, err = rc.client.Setup(track, baseURL, 0, 0)
 	if err != nil {
 		return err
 	}
-	clientSuccessful = true
+
+	rtpDec, err := format.CreateDecoder2()
+	if err != nil {
+		rc.logger.Errorf("error creating H265 decoder %v", err)
+		return err
+	}
+
+	rc.rawDecoder, err = newDecoder(C.AV_CODEC_ID_HEVC)
+	if err != nil {
+		return err
+	}
+
+	// For H.265, handle VPS, SPS, and PPS
+	if format.VPS != nil {
+		rc.rawDecoder.decode(format.VPS)
+	}
+	if format.SPS != nil {
+		rc.rawDecoder.decode(format.SPS)
+	}
+	if format.PPS != nil {
+		rc.rawDecoder.decode(format.PPS)
+	}
+
+	// On packet retreival, turn it into an image, and store it in shared memory
+	rc.client.OnPacketRTP(track, format, func(pkt *rtp.Packet) {
+		// extract access units from RTP packets
+		au, _, err := rtpDec.Decode(pkt)
+		if err != nil {
+			if err != rtph265.ErrNonStartingPacketAndNoPrevious && err != rtph265.ErrMorePacketsNeeded {
+				rc.logger.Errorf("error decoding(1) h265 rstp stream %v", err)
+			}
+			return
+		}
+		for _, nalu := range au {
+			if len(nalu) < 20 {
+				rc.logger.Warnf("nalu too short")
+				continue
+			}
+			lastImage, err := rc.rawDecoder.decode(nalu)
+			if err != nil {
+				rc.logger.Error("error decoding(2) h265 rtsp stream  %v", err)
+				return
+			}
+
+			if lastImage != nil {
+				rc.latestFrame.Store(&lastImage)
+			}
+		}
+	})
+
 	return nil
 }
 
@@ -253,5 +349,6 @@ func NewRTSPCamera(ctx context.Context, name resource.Name, conf *rtsp.Config, l
 	if err != nil {
 		return nil, err
 	}
+
 	return camera.FromVideoSource(name, src, logger), nil
 }
