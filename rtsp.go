@@ -29,12 +29,13 @@ import (
 	"go.viam.com/rdk/resource"
 )
 
+
 /*
 #include <libavcodec/avcodec.h>
 */
 import "C"
 
-var family = resource.ModelNamespace("erh").WithFamily("viamrtsp")
+var family = resource.ModelNamespace("viam-labs").WithFamily("viamrtsp")
 var ModelH264 = family.WithModel("rtsp-h264")
 
 func init() {
