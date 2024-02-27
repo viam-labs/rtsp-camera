@@ -3,6 +3,7 @@ on:
 
 env:
   GOOS: android
+  GOARCH: arm64
   NDK_DIR: android-ndk-r26
   NDK_ZIP: android-ndk-r26-linux.zip
   # note: r26 won't always be 26.1.109xxx, use env vars for this and pin the DL
