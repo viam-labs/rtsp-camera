@@ -17,6 +17,7 @@ import (
 	"github.com/bluenviron/gortsplib/v3/pkg/liberrors"
 	"github.com/bluenviron/gortsplib/v3/pkg/media"
 	"github.com/bluenviron/gortsplib/v3/pkg/url"
+	"github.com/bluenviron/mediacommon/pkg/codecs/h264"
 	"github.com/bluenviron/mediacommon/pkg/codecs/h265"
 
 	"github.com/pion/rtp"
@@ -29,7 +30,6 @@ import (
 	"go.viam.com/rdk/logging"
 	"go.viam.com/rdk/resource"
 )
-
 
 /*
 #include <libavcodec/avcodec.h>
@@ -221,6 +221,8 @@ func (rc *rtspCamera) InitH264(tracks media.Medias, baseURL *url.URL) (err error
 		rc.rawDecoder.decode(format.PPS)
 	}
 
+	iFrameReceived := false
+
 	// On packet retreival, turn it into an image, and store it in shared memory
 	rc.client.OnPacketRTP(track, format, func(pkt *rtp.Packet) {
 		// extract access units from RTP packets
@@ -231,6 +233,16 @@ func (rc *rtspCamera) InitH264(tracks media.Medias, baseURL *url.URL) (err error
 			}
 			return
 		}
+
+		// wait for an I-frame
+		if !iFrameReceived {
+			if !h264.IDRPresent(au) {
+				rc.logger.Warnf("waiting for I-frame")
+				return
+			}
+			iFrameReceived = true
+		}
+
 		for _, nalu := range au {
 			if len(nalu) < 20 {
 				rc.logger.Warnf("nalu too short")
@@ -261,7 +273,7 @@ func (rc *rtspCamera) InitH265(tracks media.Medias, baseURL *url.URL) (err error
 		for _, x := range tracks {
 			rc.logger.Warnf("\t %v", x)
 		}
-		return errors.New("h264 track not found")
+		return errors.New("h265 track not found")
 	}
 
 	_, err = rc.client.Setup(track, baseURL, 0, 0)
