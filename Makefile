@@ -26,14 +26,13 @@ STRIP := $(TOOLCHAIN)/bin/llvm-strip
 NM := $(TOOLCHAIN)/bin/llvm-nm
 SYSROOT := $(TOOLCHAIN)/sysroot
 
-FFMPEG_SUBDIR=viamrtsp/ffmpeg-android
-FFMPEG_PREFIX=$(HOME)/$(FFMPEG_SUBDIR)
-X264_SUBDIR=viamrtsp/x264-android
+DROIDLIB_SUBDIR=viamrtsp-android
+DROIDLIB_PREFIX=$(HOME)/$(DROIDLIB_SUBDIR)
 
 # CGO settings
 CGO_ENABLED := 1
-CGO_CFLAGS := -I$(FFMPEG_PREFIX)/include
-CGO_LDFLAGS := -L$(FFMPEG_PREFIX)/lib
+CGO_CFLAGS := -I$(DROIDLIB_PREFIX)/include
+CGO_LDFLAGS := -L$(DROIDLIB_PREFIX)/lib
 OUTPUT_DIR := bin
 OUTPUT := $(OUTPUT_DIR)/viamrtsp-$(GOOS)-$(GOARCH)
 
@@ -61,7 +60,7 @@ build-android:
 
 module.tar.gz: $(OUTPUT) run.sh
 	# todo: dedup with 'make module' command
-	tar czf $@ $^ -C $(FFMPEG_PREFIX) lib
+	tar czf $@ $^ -C $(DROIDLIB_PREFIX) lib
 
 # Create linux AppImage bundle
 .PHONY: package
@@ -84,7 +83,7 @@ FFmpeg:
 x264-android:
 	# todo: pass -arch armv8-a in cflags
 	cd x264 && CC=$(CC) ./configure \
-		--prefix=$(HOME)/$(X264_SUBDIR) \
+		--prefix=$(DROIDLIB_PREFIX) \
 		--host=aarch64-linux-android \
 		--cross-prefix=$(TOOLCHAIN)/bin/llvm- \
 		--sysroot=$(SYSROOT) \
@@ -104,7 +103,7 @@ x264-android:
 ffmpeg-android: FFmpeg
 	cd FFmpeg && \
 	./configure \
-		--prefix=$(FFMPEG_PREFIX) \
+		--prefix=$(DROIDLIB_PREFIX) \
 		--target-os=android \
 		--arch=aarch64 \
 		--cpu=armv8-a \
@@ -130,7 +129,7 @@ ffmpeg-android: FFmpeg
 
 # Push FFmpeg to android device
 push-ffmpeg-android:
-	adb push $(FFMPEG_PREFIX) android /data/local/tmp/ffmpeg
+	adb push $(DROIDLIB_PREFIX) android /data/local/tmp/ffmpeg
 
 # Push binary to android device
 push-binary-android:
