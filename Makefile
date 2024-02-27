@@ -75,7 +75,6 @@ push-appimg:
 linux-dep:
 	sudo apt install libswscale-dev libavcodec-dev libavformat-dev
 
-
 FFmpeg:
 	# clone ffmpeg in the spot we need
 	# todo: maybe make this a submodule

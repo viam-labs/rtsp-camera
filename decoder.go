@@ -101,37 +101,6 @@ func newDecoder(codecID C.enum_AVCodecID) (*decoder, error) {
 	}, nil
 }
 
-// newH264Decoder allocates a new h264Decoder.
-func newH264Decoder() (*decoder, error) {
-	codec := C.avcodec_find_decoder(C.AV_CODEC_ID_H264)
-	if codec == nil {
-		return nil, fmt.Errorf("avcodec_find_decoder() failed")
-	}
-
-	codecCtx := C.avcodec_alloc_context3(codec)
-	if codecCtx == nil {
-		return nil, fmt.Errorf("avcodec_alloc_context3() failed")
-	}
-
-	res := C.avcodec_open2(codecCtx, codec, nil)
-	if res < 0 {
-		C.avcodec_close(codecCtx)
-		return nil, fmt.Errorf("avcodec_open2() failed")
-	}
-
-	srcFrame := C.av_frame_alloc()
-	if srcFrame == nil {
-		C.avcodec_close(codecCtx)
-		return nil, fmt.Errorf("av_frame_alloc() failed")
-	}
-
-	return &decoder{
-		codecCtx: codecCtx,
-
-		srcFrame: srcFrame,
-	}, nil
-}
-
 // close closes the decoder.
 func (d *decoder) close() {
 	if d.dstFrame != nil {

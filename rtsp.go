@@ -40,7 +40,7 @@ var family = resource.ModelNamespace("viam-labs").WithFamily("viamrtsp")
 var Model = family.WithModel("rtsp")
 
 func init() {
-	resource.RegisterComponent(camera.API, ModelH264, resource.Registration[camera.Camera, *rtsp.Config]{
+	resource.RegisterComponent(camera.API, Model, resource.Registration[camera.Camera, *rtsp.Config]{
 		Constructor: func(ctx context.Context, _ resource.Dependencies, conf resource.Config, logger logging.Logger) (camera.Camera, error) {
 			newConf, err := resource.NativeConfig[*rtsp.Config](conf)
 			if err != nil {
