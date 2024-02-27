@@ -28,6 +28,7 @@ SYSROOT := $(TOOLCHAIN)/sysroot
 
 FFMPEG_SUBDIR=viamrtsp/ffmpeg-android
 FFMPEG_PREFIX=$(HOME)/$(FFMPEG_SUBDIR)
+X264_SUBDIR=viamrtsp/x264-android
 
 # CGO settings
 CGO_ENABLED := 1
@@ -79,6 +80,23 @@ FFmpeg:
 	# clone ffmpeg in the spot we need
 	# todo: maybe make this a submodule
 	git clone https://github.com/FFmpeg/FFmpeg -b n6.1.1 --depth 1
+
+x264-android:
+	# todo: pass -arch armv8-a in cflags
+	cd x264 && CC=$(CC) ./configure \
+		--prefix=$(HOME)/$(X264_SUBDIR) \
+		--host=aarch64-linux-android \
+		--cross-prefix=$(TOOLCHAIN)/bin/llvm- \
+		--sysroot=$(SYSROOT) \
+		--enable-shared \
+		--disable-avs \
+		--disable-swscale \
+		--disable-lavf \
+		--disable-ffms \
+		--disable-gpac \
+		--disable-lsmash \
+	&& make -j$(shell nproc) \
+	&& make install
 
 # Build FFmpeg for Android
 # Requires Android NDK to be installed
