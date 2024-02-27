@@ -37,7 +37,7 @@ import (
 import "C"
 
 var family = resource.ModelNamespace("viam-labs").WithFamily("viamrtsp")
-var ModelH264 = family.WithModel("rtsp-h264")
+var Model = family.WithModel("rtsp")
 
 func init() {
 	resource.RegisterComponent(camera.API, ModelH264, resource.Registration[camera.Camera, *rtsp.Config]{
