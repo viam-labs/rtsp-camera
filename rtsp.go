@@ -226,7 +226,7 @@ func (rc *rtspCamera) InitH264(tracks media.Medias, baseURL *url.URL) (err error
 	// On packet retreival, turn it into an image, and store it in shared memory
 	rc.client.OnPacketRTP(track, format, func(pkt *rtp.Packet) {
 		// extract access units from RTP packets
-		au, _, err := rtpDec.Decode(pkt)
+		au, _, err := rtpDec.DecodeUntilMarker(pkt)
 		if err != nil {
 			if err != rtph264.ErrNonStartingPacketAndNoPrevious && err != rtph264.ErrMorePacketsNeeded {
 				rc.logger.Errorf("error decoding(1) h264 rstp stream %v", err)
@@ -308,7 +308,7 @@ func (rc *rtspCamera) InitH265(tracks media.Medias, baseURL *url.URL) (err error
 	// On packet retreival, turn it into an image, and store it in shared memory
 	rc.client.OnPacketRTP(track, format, func(pkt *rtp.Packet) {
 		// extract access units from RTP packets
-		au, _, err := rtpDec.Decode(pkt)
+		au, _, err := rtpDec.DecodeUntilMarker(pkt)
 		if err != nil {
 			if err != rtph265.ErrNonStartingPacketAndNoPrevious && err != rtph265.ErrMorePacketsNeeded {
 				rc.logger.Errorf("error decoding(1) h265 rstp stream %v", err)
