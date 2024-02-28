@@ -182,7 +182,7 @@ func (rc *rtspCamera) initH264(tracks media.Medias, baseURL *url.URL) (err error
 
 	track := tracks.FindFormat(&format)
 	if track == nil {
-		rc.logger.Warnf("tracks available")
+		rc.logger.Warn("tracks available")
 		for _, x := range tracks {
 			rc.logger.Warnf("\t %v", x)
 		}
@@ -208,12 +208,12 @@ func (rc *rtspCamera) initH264(tracks media.Medias, baseURL *url.URL) (err error
 	if format.SPS != nil {
 		rc.rawDecoder.decode(format.SPS)
 	} else {
-		rc.logger.Warnf("no SPS found in H264 format")
+		rc.logger.Warn("no SPS found in H264 format")
 	}
 	if format.PPS != nil {
 		rc.rawDecoder.decode(format.PPS)
 	} else {
-		rc.logger.Warnf("no PPS found in H264 format")
+		rc.logger.Warn("no PPS found in H264 format")
 	}
 
 	iFrameReceived := false
@@ -230,7 +230,7 @@ func (rc *rtspCamera) initH264(tracks media.Medias, baseURL *url.URL) (err error
 
 		if !iFrameReceived {
 			if !h264.IDRPresent(au) {
-				rc.logger.Warnf("waiting for I-frame")
+				rc.logger.Warn("waiting for I-frame")
 				return
 			}
 			iFrameReceived = true
@@ -239,7 +239,7 @@ func (rc *rtspCamera) initH264(tracks media.Medias, baseURL *url.URL) (err error
 		for _, nalu := range au {
 			if len(nalu) < 20 {
 				// TODO: this is probably wrong, but fixes a spam issue with "no frame!"
-				rc.logger.Warnf("nalu too short")
+				rc.logger.Warnf("nalu too short", len(nalu))
 				continue
 			}
 			lastImage, err := rc.rawDecoder.decode(nalu)
@@ -263,7 +263,7 @@ func (rc *rtspCamera) initH265(tracks media.Medias, baseURL *url.URL) (err error
 
 	track := tracks.FindFormat(&format)
 	if track == nil {
-		rc.logger.Warnf("tracks available")
+		rc.logger.Warn("tracks available")
 		for _, x := range tracks {
 			rc.logger.Warnf("\t %v", x)
 		}
@@ -290,13 +290,13 @@ func (rc *rtspCamera) initH265(tracks media.Medias, baseURL *url.URL) (err error
 	if format.VPS != nil {
 		rc.rawDecoder.decode(format.VPS)
 	} else {
-		rc.logger.Warnf("no VPS found in H265 format")
+		rc.logger.Warn("no VPS found in H265 format")
 	}
 
 	if format.SPS != nil {
 		rc.rawDecoder.decode(format.SPS)
 	} else {
-		rc.logger.Warnf("no SPS found in H265 format")
+		rc.logger.Warn("no SPS found in H265 format")
 	}
 
 	if format.PPS != nil {
