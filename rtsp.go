@@ -41,13 +41,14 @@ var Model = family.WithModel("rtsp")
 
 func init() {
 	resource.RegisterComponent(camera.API, Model, resource.Registration[camera.Camera, *rtsp.Config]{
-		Constructor: func(ctx context.Context, _ resource.Dependencies, conf resource.Config, logger logging.Logger) (camera.Camera, error) {
-			newConf, err := resource.NativeConfig[*rtsp.Config](conf)
-			if err != nil {
-				return nil, err
-			}
-			return newRTSPCamera(ctx, conf.ResourceName(), newConf, logger)
-		},
+		Constructor: newRTSPCamera,
+		// Constructor: func(ctx context.Context, _ resource.Dependencies, conf resource.Config, logger logging.Logger) (camera.Camera, error) {
+		// 	newConf, err := resource.NativeConfig[*rtsp.Config](conf)
+		// 	if err != nil {
+		// 		return nil, err
+		// 	}
+		// 	return newRTSPCamera(ctx, conf.ResourceName(), newConf, logger)
+		// },
 	})
 }
 
@@ -336,8 +337,13 @@ func (rc *rtspCamera) initH265(tracks media.Medias, baseURL *url.URL) (err error
 	return nil
 }
 
-func newRTSPCamera(ctx context.Context, name resource.Name, conf *rtsp.Config, logger logging.Logger) (camera.Camera, error) {
-	u, err := url.Parse(conf.Address)
+// func newRTSPCamera(ctx context.Context, name resource.Name, conf *rtsp.Config, logger logging.Logger) (camera.Camera, error) {
+func newRTSPCamera(ctx context.Context, _ resource.Dependencies, conf resource.Config, logger logging.Logger) (camera.Camera, error) {
+	newConf, err := resource.NativeConfig[*rtsp.Config](conf)
+	if err != nil {
+		return nil, err
+	}
+	u, err := url.Parse(newConf.Address)
 	if err != nil {
 		return nil, err
 	}
@@ -360,12 +366,12 @@ func newRTSPCamera(ctx context.Context, name resource.Name, conf *rtsp.Config, l
 	rtspCam.VideoReader = reader
 	rtspCam.cancelCtx = cancelCtx
 	rtspCam.cancelFunc = cancel
-	cameraModel := camera.NewPinholeModelWithBrownConradyDistortion(conf.IntrinsicParams, conf.DistortionParams)
+	cameraModel := camera.NewPinholeModelWithBrownConradyDistortion(newConf.IntrinsicParams, newConf.DistortionParams)
 	rtspCam.clientReconnectBackgroundWorker()
 	src, err := camera.NewVideoSourceFromReader(ctx, rtspCam, &cameraModel, camera.ColorStream)
 	if err != nil {
 		return nil, err
 	}
 
-	return camera.FromVideoSource(name, src, logger), nil
+	return camera.FromVideoSource(conf.ResourceName(), src, logger), nil
 }
