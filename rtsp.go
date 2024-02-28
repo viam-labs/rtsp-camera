@@ -337,7 +337,6 @@ func (rc *rtspCamera) initH265(tracks media.Medias, baseURL *url.URL) (err error
 	return nil
 }
 
-// func newRTSPCamera(ctx context.Context, name resource.Name, conf *rtsp.Config, logger logging.Logger) (camera.Camera, error) {
 func newRTSPCamera(ctx context.Context, _ resource.Dependencies, conf resource.Config, logger logging.Logger) (camera.Camera, error) {
 	newConf, err := resource.NativeConfig[*rtsp.Config](conf)
 	if err != nil {
