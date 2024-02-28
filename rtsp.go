@@ -42,13 +42,6 @@ var Model = family.WithModel("rtsp")
 func init() {
 	resource.RegisterComponent(camera.API, Model, resource.Registration[camera.Camera, *rtsp.Config]{
 		Constructor: newRTSPCamera,
-		// Constructor: func(ctx context.Context, _ resource.Dependencies, conf resource.Config, logger logging.Logger) (camera.Camera, error) {
-		// 	newConf, err := resource.NativeConfig[*rtsp.Config](conf)
-		// 	if err != nil {
-		// 		return nil, err
-		// 	}
-		// 	return newRTSPCamera(ctx, conf.ResourceName(), newConf, logger)
-		// },
 	})
 }
 
