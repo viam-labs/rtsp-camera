@@ -154,13 +154,13 @@ func (rc *rtspCamera) reconnectClient() (err error) {
 
 	switch codecInfo {
 	case "h264":
-		rc.logger.Infof("setting up H264")
+		rc.logger.Infof("setting up H264 decoder")
 		err = rc.initH264(tracks, baseURL)
 	case "h265":
-		rc.logger.Infof("setting up H265")
+		rc.logger.Infof("setting up H265 deoder")
 		err = rc.initH265(tracks, baseURL)
 	default:
-		return errors.New("codec not supported")
+		return errors.Errorf("codec not supported %v", codecInfo)
 	}
 	if err != nil {
 		return err
