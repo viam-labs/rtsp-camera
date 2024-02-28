@@ -46,7 +46,7 @@ func init() {
 			if err != nil {
 				return nil, err
 			}
-			return NewRTSPCamera(ctx, conf.ResourceName(), newConf, logger)
+			return newRTSPCamera(ctx, conf.ResourceName(), newConf, logger)
 		},
 	})
 }
@@ -126,8 +126,6 @@ func (rc *rtspCamera) closeConnection() error {
 
 // reconnectClient reconnects the RTSP client to the streaming server by closing the old one and starting a new one.
 func (rc *rtspCamera) reconnectClient() (err error) {
-	rc.logger.Warnf("reconnectClient called")
-
 	if rc == nil {
 		return errors.New("rtspCamera is nil")
 	}
@@ -137,7 +135,7 @@ func (rc *rtspCamera) reconnectClient() (err error) {
 		rc.logger.Debugw("error while closing rtsp client:", "error", err)
 	}
 
-	// replace the client with a new one, but close it if setup is not successful
+	// Replace the client with a new one, but close it if setup is not successful
 	rc.client = &gortsplib.Client{}
 
 	var clientSuccessful bool
@@ -157,17 +155,16 @@ func (rc *rtspCamera) reconnectClient() (err error) {
 		return err
 	}
 
-	// find codec info from GetStreamInfo
 	codecInfo := GetStreamInfo(rc.u.String())
 	rc.logger.Infof("codec info: %v", codecInfo)
 
 	switch codecInfo {
 	case "h264":
 		rc.logger.Infof("setting up H264")
-		err = rc.InitH264(tracks, baseURL)
+		err = rc.initH264(tracks, baseURL)
 	case "h265":
 		rc.logger.Infof("setting up H265")
-		err = rc.InitH265(tracks, baseURL)
+		err = rc.initH265(tracks, baseURL)
 	default:
 		return errors.New("codec not supported")
 	}
@@ -185,7 +182,7 @@ func (rc *rtspCamera) reconnectClient() (err error) {
 }
 
 // InitH264
-func (rc *rtspCamera) InitH264(tracks media.Medias, baseURL *url.URL) (err error) {
+func (rc *rtspCamera) initH264(tracks media.Medias, baseURL *url.URL) (err error) {
 	// setup RTP/H264 -> H264 decoder
 	var format *formats.H264
 
@@ -225,7 +222,6 @@ func (rc *rtspCamera) InitH264(tracks media.Medias, baseURL *url.URL) (err error
 
 	// On packet retreival, turn it into an image, and store it in shared memory
 	rc.client.OnPacketRTP(track, format, func(pkt *rtp.Packet) {
-		// extract access units from RTP packets
 		au, _, err := rtpDec.DecodeUntilMarker(pkt)
 		if err != nil {
 			if err != rtph264.ErrNonStartingPacketAndNoPrevious && err != rtph264.ErrMorePacketsNeeded {
@@ -234,7 +230,6 @@ func (rc *rtspCamera) InitH264(tracks media.Medias, baseURL *url.URL) (err error
 			return
 		}
 
-		// wait for an I-frame
 		if !iFrameReceived {
 			if !h264.IDRPresent(au) {
 				rc.logger.Warnf("waiting for I-frame")
@@ -264,7 +259,7 @@ func (rc *rtspCamera) InitH264(tracks media.Medias, baseURL *url.URL) (err error
 }
 
 // InitH265
-func (rc *rtspCamera) InitH265(tracks media.Medias, baseURL *url.URL) (err error) {
+func (rc *rtspCamera) initH265(tracks media.Medias, baseURL *url.URL) (err error) {
 	var format *formats.H265
 
 	track := tracks.FindFormat(&format)
@@ -341,7 +336,7 @@ func (rc *rtspCamera) InitH265(tracks media.Medias, baseURL *url.URL) (err error
 	return nil
 }
 
-func NewRTSPCamera(ctx context.Context, name resource.Name, conf *rtsp.Config, logger logging.Logger) (camera.Camera, error) {
+func newRTSPCamera(ctx context.Context, name resource.Name, conf *rtsp.Config, logger logging.Logger) (camera.Camera, error) {
 	u, err := url.Parse(conf.Address)
 	if err != nil {
 		return nil, err
