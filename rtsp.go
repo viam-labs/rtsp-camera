@@ -207,9 +207,13 @@ func (rc *rtspCamera) initH264(tracks media.Medias, baseURL *url.URL) (err error
 	// For H.264, handle SPS and PPS (assuming your H264 format has these fields)
 	if format.SPS != nil {
 		rc.rawDecoder.decode(format.SPS)
+	} else {
+		rc.logger.Warnf("no SPS found in H264 format")
 	}
 	if format.PPS != nil {
 		rc.rawDecoder.decode(format.PPS)
+	} else {
+		rc.logger.Warnf("no PPS found in H264 format")
 	}
 
 	iFrameReceived := false
@@ -234,6 +238,7 @@ func (rc *rtspCamera) initH264(tracks media.Medias, baseURL *url.URL) (err error
 
 		for _, nalu := range au {
 			if len(nalu) < 20 {
+				// TODO: this is probably wrong, but fixes a spam issue with "no frame!"
 				rc.logger.Warnf("nalu too short")
 				continue
 			}
@@ -284,19 +289,27 @@ func (rc *rtspCamera) initH265(tracks media.Medias, baseURL *url.URL) (err error
 	// For H.265, handle VPS, SPS, and PPS
 	if format.VPS != nil {
 		rc.rawDecoder.decode(format.VPS)
+	} else {
+		rc.logger.Warnf("no VPS found in H265 format")
 	}
+
 	if format.SPS != nil {
 		rc.rawDecoder.decode(format.SPS)
+	} else {
+		rc.logger.Warnf("no SPS found in H265 format")
 	}
+
 	if format.PPS != nil {
 		rc.rawDecoder.decode(format.PPS)
+	} else {
+		rc.logger.Warnf("no PPS found in H265 format")
 	}
 
 	iFrameReceived := false
 
 	// On packet retreival, turn it into an image, and store it in shared memory
 	rc.client.OnPacketRTP(track, format, func(pkt *rtp.Packet) {
-		// extract access units from RTP packets
+		// Extract access units from RTP packets
 		au, _, err := rtpDec.DecodeUntilMarker(pkt)
 		if err != nil {
 			if err != rtph265.ErrNonStartingPacketAndNoPrevious && err != rtph265.ErrMorePacketsNeeded {
