@@ -32,8 +32,8 @@ func frameLineSize(frame *C.AVFrame) *C.int {
 	return (*C.int)(unsafe.Pointer(&frame.linesize[0]))
 }
 
-// GetStreamInfo opens a stream URL and retrieves its information
-func GetStreamInfo(url string) string {
+// getStreamInfo opens a stream URL and retrieves its information
+func getStreamInfo(url string) string {
 	// Register all formats and codecs
 	C.avformat_network_init()
 

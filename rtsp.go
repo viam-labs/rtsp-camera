@@ -149,7 +149,7 @@ func (rc *rtspCamera) reconnectClient() (err error) {
 		return err
 	}
 
-	codecInfo := GetStreamInfo(rc.u.String())
+	codecInfo := getStreamInfo(rc.u.String())
 	rc.logger.Infof("codec info: %v", codecInfo)
 
 	switch codecInfo {
