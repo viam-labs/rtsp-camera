@@ -36,7 +36,7 @@ import (
 */
 import "C"
 
-var family = resource.ModelNamespace("viam-labs").WithFamily("viamrtsp")
+var family = resource.ModelNamespace("viam-labs").WithFamily("camera")
 var Model = family.WithModel("rtsp")
 
 func init() {
