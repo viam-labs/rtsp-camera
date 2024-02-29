@@ -30,12 +30,11 @@ The following attributes are available for `oak-d` cameras:
 | ---- | ---- | --------- | ----------- |
 | `rtsp_address` | string | Required | RTSP server stream URL |
 
-### Supported Codecs
+### Supported codecs
 
 The `rtsp-cam` module supports the following codecs:
 - **H.264**
 - **H.265**
-
 
 ### Locally installing the module
 
