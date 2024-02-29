@@ -1,0 +1,14 @@
+{
+    "module_id": "viam-labs:rtsp-cam",
+    "visibility": "public",
+    "url": "https://github.com/viam-labs/rtsp-camera",
+    "description": "module for rtsp, currently supports h264 and h265",
+    "models": [
+      {
+        "api": "rdk:component:camera",
+        "model": "viam-labs:camera:rtsp"
+      }
+    ],
+    "entrypoint": "./etc/rtsp-module-0.0.1-aarch64.AppImage"
+  }
+  
