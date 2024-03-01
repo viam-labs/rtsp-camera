@@ -9,5 +9,5 @@
         "model": "viam-labs:camera:rtsp"
       }
     ],
-    "entrypoint": "./etc/rtsp-module_id.AppImage"
+    "entrypoint": "run.sh"
   }
