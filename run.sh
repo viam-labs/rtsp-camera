@@ -5,5 +5,5 @@ if [ $(command -v getprop) ]; then
 	export LD_LIBRARY_PATH=$PWD/lib:$LD_LIBRARY_PATH
 fi
 
-echo "Running viamrtsp"
+echo running viamrtsp
 exec ./bin/viamrtsp $@
