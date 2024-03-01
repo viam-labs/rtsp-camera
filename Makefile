@@ -144,5 +144,5 @@ updaterdk:
 	go get go.viam.com/rdk@latest
 	go mod tidy
 
-module: bin/viamrtsp
-	tar czf module.tar.gz bin/viamrtsp
+module: $(OUTPUT)
+	tar czf module.tar.gz $(OUTPUT) run.sh
