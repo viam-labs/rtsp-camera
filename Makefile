@@ -3,6 +3,7 @@ GOARCH ?= $(shell go env GOARCH)
 ARCH ?= $(shell uname -m)
 TARGET_IP ?= 127.0.0.1
 API_LEVEL ?= 29
+MOD_VERSION ?= 0.0.1
 
 UNAME=$(shell uname)
 ifeq ($(UNAME),Linux)
@@ -33,8 +34,11 @@ FFMPEG_PREFIX=$(HOME)/$(FFMPEG_SUBDIR)
 CGO_ENABLED := 1
 CGO_CFLAGS := -I$(FFMPEG_PREFIX)/include
 CGO_LDFLAGS := -L$(FFMPEG_PREFIX)/lib
+
+# Output settings
 OUTPUT_DIR := bin
 OUTPUT := $(OUTPUT_DIR)/viamrtsp-$(GOOS)-$(GOARCH)
+APPIMG := rtsp-module-$(MOD_VERSION)-$(ARCH).AppImage
 
 # Build go binary for linux
 .PHONY: build-linux
@@ -58,6 +62,7 @@ build-android:
 		go build -v -tags no_cgo \
 		-o $(OUTPUT) ./cmd/module/cmd.go
 
+# TODO: combine with module target for linux
 module.tar.gz: $(OUTPUT) run.sh
 	# todo: dedup with 'make module' command
 	tar czf $@ $^ -C $(FFMPEG_PREFIX) lib
@@ -144,5 +149,6 @@ updaterdk:
 	go get go.viam.com/rdk@latest
 	go mod tidy
 
-module: $(OUTPUT)
-	tar czf module.tar.gz $(OUTPUT) run.sh
+module: $(OUTPUT) etc/$(APPIMG)
+	cp etc/$(APPIMG) $(OUTPUT_DIR)/viamrtsp && \
+		tar czf module.tar.gz $(OUTPUT_DIR)/viamrtsp run.sh
