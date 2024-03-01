@@ -62,7 +62,6 @@ build-android:
 		go build -v -tags no_cgo \
 		-o $(OUTPUT) ./cmd/module/cmd.go
 
-# TODO: combine with module target for linux
 module.tar.gz: $(OUTPUT) run.sh
 	# todo: dedup with 'make module' command
 	tar czf $@ $^ -C $(FFMPEG_PREFIX) lib
@@ -149,6 +148,7 @@ updaterdk:
 	go get go.viam.com/rdk@latest
 	go mod tidy
 
+# Package module for linux
 module: $(OUTPUT) etc/$(APPIMG)
 	cp etc/$(APPIMG) $(OUTPUT_DIR)/viamrtsp && \
 		tar czf module.tar.gz $(OUTPUT_DIR)/viamrtsp run.sh
