@@ -1,15 +1,23 @@
 Prep linux
 ===
 
-* sudo apt install libswscale-dev libavcodec-dev
+* sudo apt install libswscale-dev libavcodec-dev libavformat-dev
 
 Build for Linux
 ===
 
 * Start canon `canon -arch arm64` or `canon -arch amd64`
 * Install deps `make linux-dep`
-* Create golang binary `make build-linux`
+* Create golang binary `make build`
 * Create appimage `make package`
+* Create module tar `make module`
+
+Build for Android
+===
+* Use android rdk branch `make edit-android`
+* Install FFmpeg `make ffmpeg-android`
+* Build golang binary `GOOS=android make build`
+* Create module tar `GOOS=android make module`
 
 Notes
 ===
