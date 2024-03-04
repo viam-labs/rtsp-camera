@@ -66,7 +66,7 @@ endif
 # Create linux AppImage bundle
 .PHONY: package
 package:
-	cd etc && GOARCH=$(GOARCH) ARCH=$(ARCH) appimage-builder --recipe viam-rtsp-appimage.yml
+	cd etc && GOARCH=$(GOARCH) ARCH=$(ARCH) MOD_VERSION=$(MOD_VERSION) appimage-builder --recipe viam-rtsp-appimage.yml
 
 # Push AppImage to target device
 push-appimg:
