@@ -61,14 +61,15 @@ build-android:
 		go build -v -tags no_cgo \
 		-o $(OUTPUT) ./cmd/module/cmd.go
 
+.PHONY: module
 ifeq ($(GOOS),android)
-module: $(OUTPUT) run.sh
+module:
 	echo "Building for android" && \
 		cp $(OUTPUT) $(OUTPUT_DIR)/viamrtsp && \
-		tar czf module.targ.gz $(OUTPUT_DIR)/viamrtsp run.sh -C $(FFMPEG_PREFIX) lib
+		tar czf module.tar.gz $(OUTPUT_DIR)/viamrtsp run.sh -C $(FFMPEG_PREFIX) lib
 else
 # Package module for linux
-module: $(OUTPUT) etc/$(APPIMG)
+module:
 	echo "Building for linux" && \
 		cp etc/$(APPIMG) $(OUTPUT_DIR)/viamrtsp && \
 		tar czf module.tar.gz $(OUTPUT_DIR)/viamrtsp run.sh
