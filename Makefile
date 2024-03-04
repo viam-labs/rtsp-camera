@@ -5,7 +5,6 @@ TARGET_IP ?= 127.0.0.1
 API_LEVEL ?= 29
 MOD_VERSION ?= 0.0.1
 
-UNAME=$(shell uname)
 ifeq ($(UNAME),Linux)
 	NDK_ROOT ?= $(HOME)/Android/Sdk/ndk/26.1.10909125
 	HOST_OS ?= linux
@@ -62,9 +61,18 @@ build-android:
 		go build -v -tags no_cgo \
 		-o $(OUTPUT) ./cmd/module/cmd.go
 
-module.tar.gz: $(OUTPUT) run.sh
-	# todo: dedup with 'make module' command
-	tar czf $@ $^ -C $(FFMPEG_PREFIX) lib
+ifeq ($(GOOS),android)
+module: $(OUTPUT) run.sh
+	echo "Building for android" && \
+		cp $(OUTPUT) $(OUTPUT_DIR)/viamrtsp && \
+		tar czf module.targ.gz $(OUTPUT_DIR)/viamrtsp run.sh -C $(FFMPEG_PREFIX) lib
+else
+# Package module for linux
+module: $(OUTPUT) etc/$(APPIMG)
+	echo "Building for linux" && \
+		cp etc/$(APPIMG) $(OUTPUT_DIR)/viamrtsp && \
+		tar czf module.tar.gz $(OUTPUT_DIR)/viamrtsp run.sh
+endif
 
 # Create linux AppImage bundle
 .PHONY: package
@@ -147,8 +155,3 @@ lint:
 updaterdk:
 	go get go.viam.com/rdk@latest
 	go mod tidy
-
-# Package module for linux
-module: $(OUTPUT) etc/$(APPIMG)
-	cp etc/$(APPIMG) $(OUTPUT_DIR)/viamrtsp && \
-		tar czf module.tar.gz $(OUTPUT_DIR)/viamrtsp run.sh
