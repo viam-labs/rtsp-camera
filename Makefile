@@ -111,13 +111,11 @@ ffmpeg-android: FFmpeg
 		--sysroot=$(SYSROOT) && \
 	make -j$(shell nproc) && make install
 
-
-# Get android compatible rdk
-# Need to add 'replace go.viam.com/rdk => ./rdk-droid` to go.mod
-rdk-droid:
-	git clone git@github.com:abe-winter/rdk.git rdk-droid && \
-		cd rdk-droid && \
-		git checkout droid-apk
+# Temporary command to get an android-compatible rdk branch
+edit-android:
+	# todo: dedup with rdk-droid command
+	go mod edit -replace=go.viam.com/rdk=github.com/abe-winter/rdk@droid-apk
+	go mod tidy
 
 # RTSP server for testing
 # need docker installed
