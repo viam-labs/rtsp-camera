@@ -39,20 +39,9 @@ OUTPUT_DIR := bin
 OUTPUT := $(OUTPUT_DIR)/viamrtsp-$(GOOS)-$(GOARCH)
 APPIMG := rtsp-module-$(MOD_VERSION)-$(ARCH).AppImage
 
-# Build go binary for linux
-.PHONY: build-linux
-build-linux:
-	go build -v -o ./bin/viamrtsp-$(GOOS)-$(GOARCH) cmd/module/cmd.go
-
-edit-android:
-	# temporary command to get an android-compatible rdk branch
-	# todo: dedup with rdk-droid command
-	go mod edit -replace=go.viam.com/rdk=github.com/abe-winter/rdk@droid-apk
-	go mod tidy
-
-# Build go binary for android
-.PHONY: build-android
-build-android:
+.PHONY: module build
+ifeq ($(GOOS),android)
+build:
 	# if this fails with Camera interfaces, run `make edit-android` first
 	GOOS=android GOARCH=arm64 CGO_ENABLED=$(CGO_ENABLED) \
 		CGO_CFLAGS="$(CGO_CFLAGS)" \
@@ -60,17 +49,16 @@ build-android:
 		CC=$(CC) \
 		go build -v -tags no_cgo \
 		-o $(OUTPUT) ./cmd/module/cmd.go
-
-.PHONY: module
-ifeq ($(GOOS),android)
 module:
-	echo "Building for android" && \
+	echo "Packaging for android" && \
 		cp $(OUTPUT) $(OUTPUT_DIR)/viamrtsp && \
 		tar czf module.tar.gz $(OUTPUT_DIR)/viamrtsp run.sh -C $(FFMPEG_PREFIX) lib
 else
 # Package module for linux
+build:
+	go build -v -o ./bin/viamrtsp-$(GOOS)-$(GOARCH) cmd/module/cmd.go
 module:
-	echo "Building for linux" && \
+	echo "Packaging module for linux" && \
 		cp etc/$(APPIMG) $(OUTPUT_DIR)/viamrtsp && \
 		tar czf module.tar.gz $(OUTPUT_DIR)/viamrtsp run.sh
 endif
@@ -82,7 +70,7 @@ package:
 
 # Push AppImage to target device
 push-appimg:
-	scp etc/rtsp-module-0.0.1-$(ARCH).AppImage viam@$(TARGET_IP):~/viamrtsp-mod
+	scp etc/rtsp-module-$(MOD_VERSION)-$(ARCH).AppImage viam@$(TARGET_IP):~/viamrtsp-mod
 
 # Install dependencies
 linux-dep:
@@ -123,13 +111,6 @@ ffmpeg-android: FFmpeg
 		--sysroot=$(SYSROOT) && \
 	make -j$(shell nproc) && make install
 
-# Push FFmpeg to android device
-push-ffmpeg-android:
-	adb push $(FFMPEG_PREFIX) android /data/local/tmp/ffmpeg
-
-# Push binary to android device
-push-binary-android:
-	adb push $(OUTPUT_DIR)/viamrtsp-android-arm64 /data/local/tmp/viamrtsp-android-arm64
 
 # Get android compatible rdk
 # Need to add 'replace go.viam.com/rdk => ./rdk-droid` to go.mod
@@ -137,10 +118,6 @@ rdk-droid:
 	git clone git@github.com:abe-winter/rdk.git rdk-droid && \
 		cd rdk-droid && \
 		git checkout droid-apk
-
-# Fake cam for testing (h264)
-fake-cam:
-	ffmpeg -re -f lavfi -i testsrc=size=640x480:rate=30 -vcodec libx264 -b:v 900k -f rtsp -rtsp_transport tcp rtsp://localhost:8554/live.stream
 
 # RTSP server for testing
 # need docker installed
