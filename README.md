@@ -3,7 +3,10 @@ Prep linux
 
 * sudo apt install libswscale-dev libavcodec-dev libavformat-dev
 
-### Configure your camera
+* Start canon `canon -arch arm64` or `canon -arch amd64`
+* Install deps `make linux-dep`
+* Create golang binary `make build-linux`
+* Create appimage `make package`
 
 * Start canon `canon -arch arm64` or `canon -arch amd64`
 * Install deps `make linux-dep`
@@ -27,47 +30,6 @@ Sample Config
 ===
 ```
 {
-  "rtsp": "rtsp://username:password@ip:port/path"
+      "rtsp_address": "rtsp://foo:bar@192.168.10.10:554/stream"
 }
 ```
-
-### Attributes
-
-The following attributes are available for `oak-d` cameras:
-
-| Name | Type | Inclusion | Description |
-| ---- | ---- | --------- | ----------- |
-| `rtsp_address` | string | Required | RTSP server stream URL |
-
-### Supported Codecs
-
-The `rtsp-cam` module supports the following codecs:
-- **H.264**
-- **H.265**
-
-
-### Locally installing the module
-
-#### Build
-
-- Start canon `canon -arch arm64` or `canon -arch amd64`
-- Install deps `make linux-dep`
-- Create golang binary `make build-linux`
-- Create appimage `make package`
-- Push appiamge to target `TARGET_IP=127.0.0.1 make push-appimage`
-
-#### Configure
-
-```json
-  "modules": [
-    {
-      "executable_path": "/home/viam/viamrtsp-mod",
-      "name": "rtsp-mod",
-      "type": "local"
-    }
-  ]
-
-```
-
-## References
-- Heavily cribbed from https://github.com/bluenviron/gortsplib
