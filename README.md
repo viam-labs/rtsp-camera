@@ -1,6 +1,5 @@
 Prep Linux
 ===
-
 * sudo apt install libswscale-dev libavcodec-dev libavformat-dev
 
 Build for Linux
