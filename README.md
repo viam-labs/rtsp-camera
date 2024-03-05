@@ -16,8 +16,8 @@ Build for Android
 ===
 * Use android rdk branch `make edit-android`
 * Install FFmpeg `make ffmpeg-android`
-* Build golang binary `GOOS=android make build`
-* Create module tar `GOOS=android make module`
+* Build golang binary `GOOS=android GOARCH=arm64 make build`
+* Create module tar `GOOS=android GOARCH=arm64 make module`
 
 Notes
 ===
