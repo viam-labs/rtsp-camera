@@ -1,4 +1,4 @@
-Prep linux
+Prep Linux
 ===
 
 * sudo apt install libswscale-dev libavcodec-dev libavformat-dev
@@ -24,7 +24,6 @@ Build for Android
 Notes
 ===
 * Heavily cribbed from https://github.com/bluenviron/gortsplib/blob/main/examples/client-read-format-h264-convert-to-jpeg/main.go
-
 
 Sample Config
 ===
