@@ -5,6 +5,7 @@ TARGET_IP ?= 127.0.0.1
 API_LEVEL ?= 29
 MOD_VERSION ?= 0.0.1
 
+UNAME=$(shell uname)
 ifeq ($(UNAME),Linux)
 	NDK_ROOT ?= $(HOME)/Android/Sdk/ndk/26.1.10909125
 	HOST_OS ?= linux
