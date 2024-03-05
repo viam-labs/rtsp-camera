@@ -3,11 +3,8 @@ Prep Linux
 
 * sudo apt install libswscale-dev libavcodec-dev libavformat-dev
 
-* Start canon `canon -arch arm64` or `canon -arch amd64`
-* Install deps `make linux-dep`
-* Create golang binary `make build-linux`
-* Create appimage `make package`
-
+Build for Linux
+===
 * Start canon `canon -arch arm64` or `canon -arch amd64`
 * Install deps `make linux-dep`
 * Create golang binary `make build`
