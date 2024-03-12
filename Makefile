@@ -16,24 +16,21 @@ else
 	CC_ARCH ?= aarch64
 endif
 
-# FFmpeg build settings
 TOOLCHAIN := $(NDK_ROOT)/toolchains/llvm/prebuilt/$(HOST_OS)-x86_64
-CC := $(TOOLCHAIN)/bin/$(CC_ARCH)-linux-android$(API_LEVEL)-clang
-CXX := $(TOOLCHAIN)/bin/$(CC_ARCH)-linux-android$(API_LEVEL)-clang++
-AR := $(TOOLCHAIN)/bin/llvm-ar
-LD := $(CC)
-RANLIB := $(TOOLCHAIN)/bin/llvm-ranlib
-STRIP := $(TOOLCHAIN)/bin/llvm-strip
-NM := $(TOOLCHAIN)/bin/llvm-nm
-SYSROOT := $(TOOLCHAIN)/sysroot
+ifeq ($(GOOS),android)
+	CC ?= $(TOOLCHAIN)/bin/$(CC_ARCH)-linux-android$(API_LEVEL)-clang
+else
+	CC ?= $(shell which gcc)
+endif
 
-FFMPEG_SUBDIR=viamrtsp/ffmpeg-android
-FFMPEG_PREFIX=$(HOME)/$(FFMPEG_SUBDIR)
+FFMPEG_SUBDIR=ffmpeg-$(GOOS)-$(GOARCH)
+FFMPEG_PREFIX=$(PWD)/$(FFMPEG_SUBDIR)
 
 # CGO settings
 CGO_ENABLED := 1
 CGO_CFLAGS := -I$(FFMPEG_PREFIX)/include
-CGO_LDFLAGS := -L$(FFMPEG_PREFIX)/lib
+CGO_LDFLAGS=-L$(FFMPEG_PREFIX)/lib -Wl,-rpath,$(FFMPEG_PREFIX)/lib \
+
 
 # Output settings
 OUTPUT_DIR := bin
@@ -41,28 +38,16 @@ OUTPUT := $(OUTPUT_DIR)/viamrtsp-$(GOOS)-$(GOARCH)
 APPIMG := rtsp-module-$(MOD_VERSION)-$(ARCH).AppImage
 
 .PHONY: module build
-ifeq ($(GOOS),android)
 build:
-	# if this fails with Camera interfaces, run `make edit-android` first
-	GOOS=android GOARCH=arm64 CGO_ENABLED=$(CGO_ENABLED) \
+	CGO_ENABLED=$(CGO_ENABLED) \
 		CGO_CFLAGS="$(CGO_CFLAGS)" \
 		CGO_LDFLAGS="$(CGO_LDFLAGS)" \
 		CC=$(CC) \
 		go build -v -tags no_cgo \
 		-o $(OUTPUT) ./cmd/module/cmd.go
 module:
-	echo "Packaging for android" && \
-		cp $(OUTPUT) $(OUTPUT_DIR)/viamrtsp && \
+	cp $(OUTPUT) $(OUTPUT_DIR)/viamrtsp && \
 		tar czf module.tar.gz $(OUTPUT_DIR)/viamrtsp run.sh -C $(FFMPEG_PREFIX) lib
-else
-# Package module for linux
-build:
-	go build -v -o ./bin/viamrtsp-$(GOOS)-$(GOARCH) cmd/module/cmd.go
-module:
-	echo "Packaging module for linux" && \
-		cp etc/$(APPIMG) $(OUTPUT_DIR)/viamrtsp && \
-		tar czf module.tar.gz $(OUTPUT_DIR)/viamrtsp run.sh
-endif
 
 # Create linux AppImage bundle
 .PHONY: package
@@ -111,6 +96,9 @@ ffmpeg-android: FFmpeg
 		--enable-cross-compile \
 		--sysroot=$(SYSROOT) && \
 	make -j$(shell nproc) && make install
+
+test-ffmpeg:
+	FFMPEG_PREFIX=$(FFMPEG_PREFIX) GOOS=$(GOOS) HOST_OS=$(HOST_OS) API_LEVEL=$(API_LEVEL) CC_ARCH=$(CC_ARCH) NDK_ROOT=$(NDK_ROOT) ./etc/install_ffmpeg.sh
 
 # Temporary command to get an android-compatible rdk branch
 edit-android:
