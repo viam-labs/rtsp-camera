@@ -31,7 +31,6 @@ CGO_ENABLED := 1
 CGO_CFLAGS := -I$(FFMPEG_PREFIX)/include
 CGO_LDFLAGS=-L$(FFMPEG_PREFIX)/lib -Wl,-rpath,$(FFMPEG_PREFIX)/lib \
 
-
 # Output settings
 OUTPUT_DIR := bin
 OUTPUT := $(OUTPUT_DIR)/viamrtsp-$(GOOS)-$(GOARCH)
@@ -62,43 +61,13 @@ push-appimg:
 linux-dep:
 	sudo apt install libswscale-dev libavcodec-dev libavformat-dev
 
-FFmpeg:
-	# clone ffmpeg in the spot we need
-	# todo: maybe make this a submodule
-	git clone https://github.com/FFmpeg/FFmpeg -b n6.1.1 --depth 1
-
-# Build FFmpeg for Android
-# Requires Android NDK to be installed
-.PHONY: ffmpeg-android
-ffmpeg-android: FFmpeg
-	cd FFmpeg && \
-	./configure \
-		--prefix=$(FFMPEG_PREFIX) \
-		--target-os=android \
-		--arch=aarch64 \
-		--cpu=armv8-a \
-		--cc=$(CC) \
-		--cxx=$(CXX) \
-		--ar=$AR \
-		--ld=$(CC) \
-		--ranlib=$(RANLIB) \
-		--strip=$(STRIP) \
-		--nm=$(NM) \
-		--disable-static \
-		--enable-shared \
-		--disable-doc \
-		--disable-ffmpeg \
-		--disable-ffplay \
-		--disable-ffprobe \
-		--disable-avdevice \
-		--disable-symver \
-		--enable-small \
-		--enable-cross-compile \
-		--sysroot=$(SYSROOT) && \
-	make -j$(shell nproc) && make install
-
-test-ffmpeg:
-	FFMPEG_PREFIX=$(FFMPEG_PREFIX) GOOS=$(GOOS) HOST_OS=$(HOST_OS) API_LEVEL=$(API_LEVEL) CC_ARCH=$(CC_ARCH) NDK_ROOT=$(NDK_ROOT) ./etc/install_ffmpeg.sh
+# Build FFmpeg for Linux or Android
+.PHONY: ffmpeg
+ffmpeg:
+	FFMPEG_PREFIX=$(FFMPEG_PREFIX) GOOS=$(GOOS) \
+		HOST_OS=$(HOST_OS) API_LEVEL=$(API_LEVEL) CC_ARCH=$(CC_ARCH) \
+		NDK_ROOT=$(NDK_ROOT) CC=$(CC) \
+		./etc/install_ffmpeg.sh
 
 # Temporary command to get an android-compatible rdk branch
 edit-android:

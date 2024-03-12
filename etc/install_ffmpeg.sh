@@ -2,13 +2,13 @@
 clone_ffmpeg() {
   if [ -d FFmpeg ]; then
     echo "FFmpeg already cloned"
+    return
   fi
   echo "Cloning ffmpeg"
   git clone https://github.com/FFmpeg/FFmpeg -b n6.1.1 --depth 1
 }
 
 TOOLCHAIN=${NDK_ROOT}/toolchains/llvm/prebuilt/${HOST_OS}-x86_64
-CC=${TOOLCHAIN}/bin/${CC_ARCH}-linux-android${API_LEVEL}-clang
 CXX=${TOOLCHAIN}/bin/${CC_ARCH}-linux-android${API_LEVEL}-clang++
 AR=${TOOLCHAIN}/bin/llvm-ar
 LD=${CC}
@@ -49,7 +49,6 @@ if [ "$GOOS" = "android" ]; then
     make install
 
 elif [ "$GOOS" = "linux" ]; then
-  # install ffmpeg
   clone_ffmpeg
   cd FFmpeg
   echo "Configuring ffmpeg"
