@@ -42,7 +42,9 @@ if [ "$GOOS" = "android" ]; then
     --disable-symver \
     --enable-small \
     --enable-cross-compile \
-    --sysroot=$SYSROOT
+    --sysroot=$SYSROOT \
+    --disable-lzma \
+    --disable-zlib
   echo "Installing to $FFMPEG_PREFIX"
   make -j$(nproc)
   make install
@@ -61,7 +63,10 @@ elif [ "$GOOS" = "linux" ]; then
     --disable-ffprobe \
     --disable-avdevice \
     --disable-symver \
-    --enable-small
+    --enable-small \
+    --disable-lzma \
+    --disable-zlib
+
     make -j$(nproc)
     echo "Installing to $FFMPEG_PREFIX"
     make install

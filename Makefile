@@ -36,8 +36,6 @@ OUTPUT_DIR := bin
 OUTPUT := $(OUTPUT_DIR)/viamrtsp-$(GOOS)-$(GOARCH)
 APPIMG := rtsp-module-$(MOD_VERSION)-$(ARCH).AppImage
 
-
-
 # should i add this flag??
 # 		-ldflags '-extldflags "-static"'
 .PHONY: module build
