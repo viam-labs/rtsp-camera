@@ -29,13 +29,15 @@ FFMPEG_PREFIX=$(PWD)/$(FFMPEG_SUBDIR)
 # CGO settings
 CGO_ENABLED := 1
 CGO_CFLAGS := -I$(FFMPEG_PREFIX)/include
-CGO_LDFLAGS=-L$(FFMPEG_PREFIX)/lib -Wl,-rpath,$(FFMPEG_PREFIX)/lib \
+CGO_LDFLAGS=-L$(FFMPEG_PREFIX)/lib
 
 # Output settings
 OUTPUT_DIR := bin
 OUTPUT := $(OUTPUT_DIR)/viamrtsp-$(GOOS)-$(GOARCH)
 APPIMG := rtsp-module-$(MOD_VERSION)-$(ARCH).AppImage
 
+# should i add this flag??
+# 		-ldflags '-extldflags "-static"'
 .PHONY: module build
 build:
 	CGO_ENABLED=$(CGO_ENABLED) \
@@ -45,17 +47,12 @@ build:
 		go build -v -tags no_cgo \
 		-o $(OUTPUT) ./cmd/module/cmd.go
 module:
-	cp $(OUTPUT) $(OUTPUT_DIR)/viamrtsp && \
-		tar czf module.tar.gz $(OUTPUT_DIR)/viamrtsp run.sh -C $(FFMPEG_PREFIX) lib
+	cp $(OUTPUT) $(OUTPUT_DIR)/viamrtsp
 
 # Create linux AppImage bundle
 .PHONY: package
 package:
 	cd etc && GOARCH=$(GOARCH) ARCH=$(ARCH) MOD_VERSION=$(MOD_VERSION) appimage-builder --recipe viam-rtsp-appimage.yml
-
-# Push AppImage to target device
-push-appimg:
-	scp etc/rtsp-module-$(MOD_VERSION)-$(ARCH).AppImage viam@$(TARGET_IP):~/viamrtsp-mod
 
 # Install dependencies
 linux-dep:

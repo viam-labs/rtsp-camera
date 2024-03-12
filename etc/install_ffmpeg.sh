@@ -33,8 +33,8 @@ if [ "$GOOS" = "android" ]; then
     --ranlib=$RANLIB \
     --strip=$STRIP \
     --nm=$NM \
-    --disable-static \
-    --enable-shared \
++   --enable-static \
++   --disable-shared \
     --disable-doc \
     --disable-ffmpeg \
     --disable-ffplay \
@@ -54,8 +54,8 @@ elif [ "$GOOS" = "linux" ]; then
   echo "Configuring ffmpeg"
   ./configure \
     --prefix=$FFMPEG_PREFIX \
-    --disable-static \
-    --enable-shared \
+    --enable-static \
+    --disable-shared \
     --disable-doc \
     --disable-ffmpeg \
     --disable-ffplay \
