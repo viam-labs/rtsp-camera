@@ -18,9 +18,9 @@ endif
 
 TOOLCHAIN := $(NDK_ROOT)/toolchains/llvm/prebuilt/$(HOST_OS)-x86_64
 ifeq ($(GOOS),android)
-	CC ?= $(TOOLCHAIN)/bin/$(CC_ARCH)-linux-android$(API_LEVEL)-clang
+	CC := $(TOOLCHAIN)/bin/$(CC_ARCH)-linux-android$(API_LEVEL)-clang
 else
-	CC ?= $(shell which gcc)
+	CC := $(shell which gcc)
 endif
 
 FFMPEG_SUBDIR=ffmpeg-$(GOOS)-$(GOARCH)
@@ -35,6 +35,8 @@ CGO_LDFLAGS=-L$(FFMPEG_PREFIX)/lib
 OUTPUT_DIR := bin
 OUTPUT := $(OUTPUT_DIR)/viamrtsp-$(GOOS)-$(GOARCH)
 APPIMG := rtsp-module-$(MOD_VERSION)-$(ARCH).AppImage
+
+
 
 # should i add this flag??
 # 		-ldflags '-extldflags "-static"'
@@ -61,10 +63,7 @@ linux-dep:
 # Build FFmpeg for Linux or Android
 .PHONY: ffmpeg
 ffmpeg:
-	FFMPEG_PREFIX=$(FFMPEG_PREFIX) GOOS=$(GOOS) \
-		HOST_OS=$(HOST_OS) API_LEVEL=$(API_LEVEL) CC_ARCH=$(CC_ARCH) \
-		NDK_ROOT=$(NDK_ROOT) CC=$(CC) \
-		./etc/install_ffmpeg.sh
+	FFMPEG_PREFIX=$(FFMPEG_PREFIX) GOOS=$(GOOS) TOOLCHAIN=$(TOOLCHAIN) API_LEVEL=$(API_LEVEL) CC_ARCH=$(CC_ARCH) CC=$(CC) ./etc/install_ffmpeg.sh
 
 # Temporary command to get an android-compatible rdk branch
 edit-android:

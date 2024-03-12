@@ -8,7 +8,6 @@ clone_ffmpeg() {
   git clone https://github.com/FFmpeg/FFmpeg -b n6.1.1 --depth 1
 }
 
-TOOLCHAIN=${NDK_ROOT}/toolchains/llvm/prebuilt/${HOST_OS}-x86_64
 CXX=${TOOLCHAIN}/bin/${CC_ARCH}-linux-android${API_LEVEL}-clang++
 AR=${TOOLCHAIN}/bin/llvm-ar
 LD=${CC}
@@ -33,8 +32,8 @@ if [ "$GOOS" = "android" ]; then
     --ranlib=$RANLIB \
     --strip=$STRIP \
     --nm=$NM \
-+   --enable-static \
-+   --disable-shared \
+    --enable-static \
+    --disable-shared \
     --disable-doc \
     --disable-ffmpeg \
     --disable-ffplay \
@@ -44,9 +43,9 @@ if [ "$GOOS" = "android" ]; then
     --enable-small \
     --enable-cross-compile \
     --sysroot=$SYSROOT
-    echo "Installing to $FFMPEG_PREFIX"
-    make -j$(nproc)
-    make install
+  echo "Installing to $FFMPEG_PREFIX"
+  make -j$(nproc)
+  make install
 
 elif [ "$GOOS" = "linux" ]; then
   clone_ffmpeg
