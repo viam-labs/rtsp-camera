@@ -36,8 +36,6 @@ OUTPUT_DIR := bin
 OUTPUT := $(OUTPUT_DIR)/viamrtsp-$(GOOS)-$(GOARCH)
 APPIMG := rtsp-module-$(MOD_VERSION)-$(ARCH).AppImage
 
-# should i add this flag??
-# 		-ldflags '-extldflags "-static"'
 .PHONY: module build
 build:
 	CGO_ENABLED=$(CGO_ENABLED) \
@@ -48,11 +46,6 @@ build:
 		-o $(OUTPUT) ./cmd/module/cmd.go
 module:
 	cp $(OUTPUT) $(OUTPUT_DIR)/viamrtsp
-
-# Create linux AppImage bundle
-.PHONY: package
-package:
-	cd etc && GOARCH=$(GOARCH) ARCH=$(ARCH) MOD_VERSION=$(MOD_VERSION) appimage-builder --recipe viam-rtsp-appimage.yml
 
 # Install dependencies
 linux-dep:
@@ -68,11 +61,6 @@ edit-android:
 	# todo: dedup with rdk-droid command
 	go mod edit -replace=go.viam.com/rdk=github.com/abe-winter/rdk@droid-apk
 	go mod tidy
-
-# RTSP server for testing
-# need docker installed
-rtsp-server:
-	cd etc && docker run --rm -it -v rtsp-simple-server.yml:/rtsp-simple-server.yml -p 8554:8554 aler9/rtsp-simple-server:v1.3.0
 
 test:
 	go test
