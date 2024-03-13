@@ -5,17 +5,16 @@ Prep Linux
 Build for Linux
 ===
 * Start canon `canon -arch arm64` or `canon -arch amd64`
-* Install deps `make linux-dep`
+* Install ffmpeg `make ffmpeg`
 * Create golang binary `make build`
-* Create appimage `make package`
-* Create module tar `make module`
+* Create module `make module`
 
 Build for Android
 ===
 * Use android rdk branch `make edit-android`
-* Install FFmpeg `make ffmpeg-android`
+* Install FFmpeg `GOOS=android GOARCH=arm64 make ffmpeg`
 * Build golang binary `GOOS=android GOARCH=arm64 make build`
-* Create module tar `GOOS=android GOARCH=arm64 make module`
+* Create module `GOOS=android GOARCH=arm64 make module`
 
 Notes
 ===

@@ -7,7 +7,7 @@ import (
 )
 
 /*
-#cgo LDFLAGS: -lavcodec -lavutil -lswscale -lavformat
+#cgo LDFLAGS: -lavformat -lavcodec -lavfilter -lavutil -lswresample -lswscale -lm
 #include <libavcodec/avcodec.h>
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
