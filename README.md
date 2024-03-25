@@ -1,6 +1,6 @@
-# [`rstp` module](https://app.viam.com/module/viam-labs/rtsp-cam)
+# [`rtsp` module](https://app.viam.com/module/viam-labs/rtsp-cam)
 
-This module implements the [`"rdk:component:camera"` API](https://docs.viam.com/components/camera/) in an `rstp` model.
+This module implements the [`"rdk:component:camera"` API](https://docs.viam.com/components/camera/) in an `rtsp` model.
 With this model, you can configure a streaming camera with an h264 or h265 track for use with Viam.
 
 > [!NOTE]
@@ -26,7 +26,7 @@ With this model, you can configure a streaming camera with an h264 or h265 track
 * Build golang binary `GOOS=android GOARCH=arm64 make build`
 * Create module tar `GOOS=android GOARCH=arm64 make module`
 
-## Configure your `rstp` camera
+## Configure your `rtsp` camera
 
 > [!NOTE]
 > Before configuring your camera, you must [create a machine](https://docs.viam.com/manage/fleet/machines/#add-a-new-machine).
